@@ -66,7 +66,7 @@ namespace TMonitor
             //Составляем полный путь к директории куда будут сохраняться файлы логов
             logDirectory = Application.persistentDataPath + "/" + logsFolder;//Необходимо дописать кастомизацию
             //Небольшой хак для случая когда скрипт открывается в эдиторе на виндоус
-            //ClearLogsHack(logDirectory);
+            ClearLogsHack(logDirectory);
                 //Меняем путь на / только для Windows платформы. Файл должен находиться в корне системы, по умолчанию это C:\
             #if (UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN)
                 highPriorityConf = "/conf.json";
@@ -119,16 +119,20 @@ namespace TMonitor
             });
             //Проверяем заданный токен инсталяции, есть ли такой в БД на сервере - чтоб удостовериться что Телеметрия бдует принематься по данной инсталяции.
             //Если такой ключ не зарегестрирован то кидаем исключение в качестве напоминания разработчику что надо обновить ключ епт
-            inspector.CheckInstallationToken(checkTokenExceptionMode);
+            //inspector.CheckInstallationToken(checkTokenExceptionMode);
             //Далее создаются инициативы кые будут испольняться через промежутки времени
             int pingInterval = Convert.ToInt32(setup["initPingInterval"]);
             int logsToServerInterval = Convert.ToInt32(setup["initLogsToServerInterval"]);
             int newsFeedToLogsInterval = Convert.ToInt32(setup["initNewsFeedToLogsInterval"]);
             int windowDressingInterval = Convert.ToInt32(setup["initWindowDressingInterval"]);
-            thePingSignalToServer = new CInitiative(inspector.SendPingSignalToServer, pingInterval * 1000, true, true, "Ping 1m", "Каждую минуту отсылает Пинг-сигнал на сервер");
-            theLogsToServer = new CInitiative(inspector.SendLogsToServer, logsToServerInterval * 1000, true, true, "SendingLogs 1h", "Отсылка статистики из логов на сервер");
-            theNewsFeedToLogs = new CInitiative(inspector.NewsFeedToLogs, newsFeedToLogsInterval * 1000, true, true, "NewsFeedToLogs 15m", "Забираем данные из ленты новостей и помещаем в логи, после чего очищаем ленту новостей");
-            theWindowDressing = new CInitiative(inspector.WindowDressing, windowDressingInterval * 1000, true, true, "WindowDressing 1m", "Заполняем Ленту новостей чем-нибудь. Зондирующие сигналы");
+            InvokeRepeating("SendPingSignalToServer", 0.1f, pingInterval);
+            InvokeRepeating("SendLogsToServer", 0.1f, logsToServerInterval);
+            InvokeRepeating("NewsFeedToLogs", 0.1f, newsFeedToLogsInterval);
+            InvokeRepeating("WindowDressing", 0.1f, windowDressingInterval);
+            //thePingSignalToServer = new CInitiative(inspector.SendPingSignalToServer, pingInterval * 1000, true, true, "Ping 1m", "Каждую минуту отсылает Пинг-сигнал на сервер");
+            //theLogsToServer = new CInitiative(inspector.SendLogsToServer, logsToServerInterval * 1000, true, true, "SendingLogs 1h", "Отсылка статистики из логов на сервер");
+            //theNewsFeedToLogs = new CInitiative(inspector.NewsFeedToLogs, newsFeedToLogsInterval * 1000, true, true, "NewsFeedToLogs 15m", "Забираем данные из ленты новостей и помещаем в логи, после чего очищаем ленту новостей");
+            //theWindowDressing = new CInitiative(inspector.WindowDressing, windowDressingInterval * 1000, true, true, "WindowDressing 1m", "Заполняем Ленту новостей чем-нибудь. Зондирующие сигналы");
         }
 	    public void OnDestroy()
         {
@@ -147,7 +151,7 @@ namespace TMonitor
                 inspector.NewsFeedToLogs();
                 inspector.SendLogsToServer();
             }
-            //ClearLogsHack(logDirectory);
+            ClearLogsHack(logDirectory);
         }
 	    // Update is called once per frame
 	    void Update () {
@@ -170,7 +174,7 @@ namespace TMonitor
         //Самые первые действия
         void ClearLogsHack(string pLogDirectory)
         {
-            #if UNITY_EDITOR
+            //#if UNITY_EDITOR
             if(Directory.Exists(pLogDirectory))
             {
                 string[] files = Directory.GetFiles(pLogDirectory);
@@ -179,7 +183,23 @@ namespace TMonitor
                     File.Delete(file);
                 }
             }
-            #endif
+            //#endif
+        }
+        public void SendPingSignalToServer()
+        {
+            inspector.SendPingSignalToServer();
+        }
+        public void SendLogsToServer()
+        {
+            inspector.SendLogsToServer();
+        }
+        public void NewsFeedToLogs()
+        {
+            inspector.NewsFeedToLogs();
+        }
+        public void WindowDressing()
+        {
+            inspector.WindowDressing();
         }
     }
 
