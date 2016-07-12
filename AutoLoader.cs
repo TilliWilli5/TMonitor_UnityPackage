@@ -22,10 +22,10 @@ namespace TMonitor
         string logDirectory;
         [HideInInspector]
         public string logsFolder = "Logs/";
-        CInitiative thePingSignalToServer;
-        CInitiative theLogsToServer;
-        CInitiative theNewsFeedToLogs;
-        CInitiative theWindowDressing;
+        //CInitiative thePingSignalToServer;
+        //CInitiative theLogsToServer;
+        //CInitiative theNewsFeedToLogs;
+        //CInitiative theWindowDressing;
 
         CClientInspector inspector;
         bool needToQuit;
@@ -125,10 +125,10 @@ namespace TMonitor
             int logsToServerInterval = Convert.ToInt32(setup["initLogsToServerInterval"]);
             int newsFeedToLogsInterval = Convert.ToInt32(setup["initNewsFeedToLogsInterval"]);
             int windowDressingInterval = Convert.ToInt32(setup["initWindowDressingInterval"]);
-            InvokeRepeating("SendPingSignalToServer", 0.1f, pingInterval);
-            InvokeRepeating("SendLogsToServer", 0.1f, logsToServerInterval);
-            InvokeRepeating("NewsFeedToLogs", 0.1f, newsFeedToLogsInterval);
-            InvokeRepeating("WindowDressing", 0.1f, windowDressingInterval);
+            InvokeRepeating("SendPingSignalToServer", (int)(pingInterval/2), pingInterval);
+            InvokeRepeating("SendLogsToServer", (int)(logsToServerInterval / 2), logsToServerInterval);
+            InvokeRepeating("NewsFeedToLogs", (int)(newsFeedToLogsInterval / 2), newsFeedToLogsInterval);
+            InvokeRepeating("WindowDressing", (int)(windowDressingInterval / 2), windowDressingInterval);
             //thePingSignalToServer = new CInitiative(inspector.SendPingSignalToServer, pingInterval * 1000, true, true, "Ping 1m", "Каждую минуту отсылает Пинг-сигнал на сервер");
             //theLogsToServer = new CInitiative(inspector.SendLogsToServer, logsToServerInterval * 1000, true, true, "SendingLogs 1h", "Отсылка статистики из логов на сервер");
             //theNewsFeedToLogs = new CInitiative(inspector.NewsFeedToLogs, newsFeedToLogsInterval * 1000, true, true, "NewsFeedToLogs 15m", "Забираем данные из ленты новостей и помещаем в логи, после чего очищаем ленту новостей");
@@ -136,14 +136,14 @@ namespace TMonitor
         }
 	    public void OnDestroy()
         {
-            if(thePingSignalToServer != null)
-                thePingSignalToServer.Destroy();
-            if(theLogsToServer != null)
-                theLogsToServer.Destroy();
-            if(theNewsFeedToLogs != null)
-                theNewsFeedToLogs.Destroy();
-            if(theWindowDressing != null)
-                theWindowDressing.Destroy();
+            //if(thePingSignalToServer != null)
+            //    thePingSignalToServer.Destroy();
+            //if(theLogsToServer != null)
+            //    theLogsToServer.Destroy();
+            //if(theNewsFeedToLogs != null)
+            //    theNewsFeedToLogs.Destroy();
+            //if(theWindowDressing != null)
+            //    theWindowDressing.Destroy();
             //Приложение заканчивает свою работу. Генерируем новость об этом. Эта строчка должна оставаться последней
             CNewsCollector.ApplicationEnd("mark!AutoLoader");
             if (inspector != null)
