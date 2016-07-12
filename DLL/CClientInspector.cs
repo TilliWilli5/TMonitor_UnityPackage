@@ -102,7 +102,9 @@ namespace TMonitor
         public void SendPingSignalToServer()
         {
             //Console.WriteLine("[tilli]: SendPingSignalToServer start");
-            string response = postalService.SendPing("ping", JsonConvert.SerializeObject(this));
+            string response = postalService.SendPingAsync("ping", JsonConvert.SerializeObject(this));
+            if (response == null)
+                ;
             //if (response != "pong")
             //    _OnIncomingOrder(response);
             //Console.WriteLine("[tilli]: SendPingSignalToServer start");
@@ -114,7 +116,7 @@ namespace TMonitor
             Dictionary<string, string> theFileCollection = archiveService.ExtractAllArchives();
             foreach (KeyValuePair<string, string> file in theFileCollection)
             {
-                bool requestResult = postalService.SendLogs(file.Value, JsonConvert.SerializeObject(this));
+                bool requestResult = postalService.SendLogsAsync(file.Value, JsonConvert.SerializeObject(this));
                 if(requestResult)
                 {
                     //Console.WriteLine("[log2serv]:[SendLogsToServer]:before-delete-file");
@@ -146,7 +148,8 @@ namespace TMonitor
             {
                 if (response["order"] == "quit")
                 {
-                    QuitOrder?.Invoke();
+                    if (QuitOrder != null)
+                        QuitOrder();
                 }
             }
         }

@@ -5,6 +5,7 @@ using System.Net;
 using System.IO;
 using Newtonsoft.Json;
 using System.Threading;
+using UnityEngine;
 
 namespace TMonitor
 {
@@ -19,6 +20,10 @@ namespace TMonitor
         public abstract string SendPing(string pCorrespondence, string pSignature);
         public abstract bool SendLogs(string pCorrespondence, string pSignature);
         public abstract string SendCommand(string pCorrespondence, string pSignature);
+        //Asynces
+        public abstract string SendPingAsync(string pCorrespondence, string pSignature);
+        public abstract string SendCommandAsync(string pCorrespondence, string pSignature);
+        public abstract bool SendLogsAsync(string pCorrespondence, string pSignature);
         //Ивенты
         public abstract void OnSuccessDelivery();
         public abstract void OnErrorDelivery();
@@ -41,16 +46,19 @@ namespace TMonitor
 
         uint currentRetry = 0;
         CMessageEnvelope lastMessageEnvelope;
+        AsyncSender unitySender;
         //Конструктор
-        public CClientPostman(){}
+        public CClientPostman(){/* unitySender = new AsyncSender(); */}
         public CClientPostman(string pServerAddress, string pMethod, string pContentType)
         {
             serverAddress = pServerAddress;
             httpMethod = pMethod;
             httpContentType = pContentType;
+            //unitySender = new AsyncSender();
         }
         public bool Initialize(Dictionary<string, string> pConfiguration)
         {
+            //unitySender = new AsyncSender();
             try
             {
                 serverAddress = pConfiguration["serverAddress"];
@@ -169,6 +177,19 @@ namespace TMonitor
                 return null;
             }
         }
+        public override string SendPingAsync(string pCorrespondence, string pSignature)
+        {
+            CMessageEnvelope theEnvelope = new CMessageEnvelope(pCorrespondence, pSignature);
+            lastMessageEnvelope = theEnvelope;
+            string whereURL = string.Format("{0}{1}:{2}/{3}", scheme, serverAddress, port, webSubdomain);
+            string postData = theEnvelope.ToJSON();
+            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+            var postHeader = new Dictionary<string, string>();
+            postHeader.Add("Content-Type", httpContentType);
+            GameObject.Find("[TMonitor]").GetComponent<AsyncSender>().SendAsyc(whereURL, byteArray, postHeader);
+            string responseFromServer = "pong";
+            return responseFromServer;
+        }
         public override bool SendLogs(string pCorrespondence, string pSignature)
         {
             Console.WriteLine("[log2serv]:[Postman]:[SendLogs]:started");
@@ -209,6 +230,33 @@ namespace TMonitor
                 return false;
             }
             
+        }
+        public override bool SendLogsAsync(string pCorrespondence, string pSignature)
+        {
+            Console.WriteLine("[log2serv]:[Postman]:[SendLogs]:started");
+            try
+            {
+                CMessageEnvelope theEnvelope = new CMessageEnvelope(pCorrespondence, pSignature);
+                lastMessageEnvelope = theEnvelope;
+                string whereURL = string.Format("{0}{1}:{2}/{3}", scheme, serverAddress, port, webSubdomain);
+                string postData = theEnvelope.ToJSON();
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+                var postHeader = new Dictionary<string, string>();
+                postHeader.Add("Content-Type", httpContentType);
+                GameObject.Find("[TMonitor]").GetComponent<AsyncSender>().SendAsyc(whereURL, byteArray, postHeader);
+                string responseFromServer = "thx";
+                Console.WriteLine("[log2serv]:[Postman]:[SendLogs]:finished-successfully");
+                return true;
+            }
+            catch (Exception e)
+            {
+                //Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("[log2serv]:[Postman]:[SendLogs]:error:\n" + e.Message + "\n");
+                //Console.BackgroundColor = ConsoleColor.Black;
+                Console.WriteLine("[log2serv]:[Postman]:[SendLogs]:failed");
+                return false;
+            }
+
         }
         public override string SendCommand(string pCorrespondence, string pSignature)
         {
@@ -259,6 +307,19 @@ namespace TMonitor
                 //Console.WriteLine("[tilli]: SendPing Error: " + e.Message);
                 return null;
             }
+        }
+        public override string SendCommandAsync(string pCorrespondence, string pSignature)
+        {
+            CMessageEnvelope theEnvelope = new CMessageEnvelope(pCorrespondence, pSignature);
+            lastMessageEnvelope = theEnvelope;
+            string whereURL = string.Format("{0}{1}:{2}/{3}", scheme, serverAddress, port, webSubdomain);
+            string postData = theEnvelope.ToJSON();
+            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+            var postHeader = new Dictionary<string, string>();
+            postHeader.Add("Content-Type", httpContentType);
+            GameObject.Find("[TMonitor]").GetComponent<AsyncSender>().SendAsyc(whereURL, byteArray, postHeader);
+            string responseFromServer = "valid";
+            return responseFromServer;
         }
         void OnTimeout()
         {
