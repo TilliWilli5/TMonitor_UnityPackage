@@ -58,7 +58,7 @@ namespace TMonitor
             //Text memo = GameObject.Find("DebugMemo").GetComponent<Text>();
             //Как только приложение стартует добавляем первую новость о том что приложение запустилось
             CNewsCollector.ApplicationStart("mark!AutoLoader");
-            CNewsCollector.SaveData(JsonConvert.SerializeObject(AppInfoGrabber.ApplicationInfo()));
+            //CNewsCollector.SaveData(JsonConvert.SerializeObject(AppInfoGrabber.ApplicationInfo()));
             //Debug.Log("Application.dataPath: " + Application.dataPath);
             //Debug.Log("Application.dataPath: " + Application.persistentDataPath);
             //Составляем полный путь к файлу настроек
@@ -125,7 +125,7 @@ namespace TMonitor
             int logsToServerInterval = Convert.ToInt32(setup["initLogsToServerInterval"]);
             int newsFeedToLogsInterval = Convert.ToInt32(setup["initNewsFeedToLogsInterval"]);
             int windowDressingInterval = Convert.ToInt32(setup["initWindowDressingInterval"]);
-            InvokeRepeating("SendPingSignalToServer", (int)(pingInterval/2), pingInterval);
+            InvokeRepeating("SendPingSignalToServer", 1, pingInterval);
             InvokeRepeating("SendLogsToServer", (int)(logsToServerInterval / 2), logsToServerInterval);
             InvokeRepeating("NewsFeedToLogs", (int)(newsFeedToLogsInterval / 2), newsFeedToLogsInterval);
             InvokeRepeating("WindowDressing", (int)(windowDressingInterval / 2), windowDressingInterval);
@@ -134,7 +134,7 @@ namespace TMonitor
             //theNewsFeedToLogs = new CInitiative(inspector.NewsFeedToLogs, newsFeedToLogsInterval * 1000, true, true, "NewsFeedToLogs 15m", "Забираем данные из ленты новостей и помещаем в логи, после чего очищаем ленту новостей");
             //theWindowDressing = new CInitiative(inspector.WindowDressing, windowDressingInterval * 1000, true, true, "WindowDressing 1m", "Заполняем Ленту новостей чем-нибудь. Зондирующие сигналы");
         }
-	    public void OnDestroy()
+	    public void OnApplicationQuit()
         {
             //if(thePingSignalToServer != null)
             //    thePingSignalToServer.Destroy();
