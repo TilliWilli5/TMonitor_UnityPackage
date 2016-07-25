@@ -1,0 +1,5 @@
+﻿serverAddress						95.213.151.109
+initPingInterval						60
+initLogsToServerInterval			300
+initNewsFeedToLogsInterval	120
+initWindowDressingInterval		60
